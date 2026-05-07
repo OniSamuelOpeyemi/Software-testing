@@ -46,14 +46,14 @@ jobs:
           SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
         with:
           command: test
-          arg: >
+          args: >
             --severity-threshold=high
             --file=sample-app/package.json
             --json-file-output=snyk-app-results.json
 
 
       - name: Snyk Scan -Testa
-        uses: snyk.actions/node@master
+        uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
@@ -70,8 +70,8 @@ jobs:
         with:
           name: snyk-results
           path: |
-            SNYK-app-results.json
-            SNYK-test-results.json
+            snyk-app-results.json
+            snyk-test-results.json
             
     
   test:
