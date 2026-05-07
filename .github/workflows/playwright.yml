@@ -27,9 +27,56 @@ jobs:
         run: npm ci
         working-directory: sample-app/public
 
-  test:
+  security:
     runs-on: ubuntu-latest
     needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: SNYK Scan for App
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
+        with:
+          command: test
+          args: >
+            --severity-threshold=high
+            --file=sample-app/package.json
+            --json-file-output=snyk-app-results.json
+
+
+      - name: Snyk Scan - Test
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
+        with:
+          command: test
+          args: >
+            --severity-threshold=high
+            --file=tests/traditional/package.json
+            --json-file-output=snyk-test-results.json
+
+      - name: Upload Snky Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snyk-results
+          path: |
+            snyk-app-results.json
+            snyk-test-results.json
+            
+    
+  test:
+    runs-on: ubuntu-latest
+    needs: build 
     defaults:
       run:
         working-directory: tests/traditional   # ← sets default for ALL steps in this job
