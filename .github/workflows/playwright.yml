@@ -52,7 +52,7 @@ jobs:
             --json-file-output=snyk-app-results.json
 
 
-      - name: Snyk Scan -Testa
+      - name: Snyk Scan - Test
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
