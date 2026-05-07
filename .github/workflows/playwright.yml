@@ -22,10 +22,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: npm
+          cache-dependency-path: sample-app/package-lock.json
 
       - name: Install app dependencies
         run: npm ci
-        working-directory: sample-app/public
+        working-directory: sample-app/
 
   security:
     runs-on: ubuntu-latest
@@ -38,6 +40,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: npm
+          cache-dependency-path: sample-app/package-lock.json
 
       - name: SNYK Scan for App
         uses: snyk/actions/node@master
@@ -89,13 +93,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm'
+          cache-dependency-path: tests/traditional/package-lock.json
 
       - name: Install test dependencies
         run: npm ci
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+         path: ~/.cache/ms-playwright
+         key: playwright-${{ runner.os }}-${{ hashFiles('tests/traditional/package-lock.json') }}
+
+          
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
+      - name: Install system dependencies only (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+        
       - name: Get Allure history
         uses: actions/checkout@v4
         continue-on-error: true
