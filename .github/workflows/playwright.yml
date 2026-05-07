@@ -76,6 +76,15 @@ jobs:
           path: |
             snyk-app-results.json
             snyk-test-results.json
+
+      - name: Snyk Monitor - App
+        uses: snyk/actions/node@master
+        if: github.ref == 'refs/heads/main'   # ← only track main branch
+        env:
+           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --file=sample-app/package.json
             
     
   test:
